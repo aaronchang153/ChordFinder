@@ -65,4 +65,4 @@ void AudioWrapper::test()
     ma_encoder_uninit(encoder.get());
 }
 
-};
+}
