@@ -1,6 +1,7 @@
 #pragma once
 
-#include "miniaudio.h"
+#include "miniaudio/miniaudio.h"
+#include "fftw/fftw3.h"
 
 #include <cstdio>
 #include <memory>
