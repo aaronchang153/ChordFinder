@@ -21,8 +21,8 @@ void AppCore::start()
 void AppCore::initialize()
 {
     devices.push_back("default");
-    mainWindowFlags = ImGuiWindowFlags_NoMove;
-    configWindowFlags = ImGuiWindowFlags_NoMove;
+    mainWindowFlags = 0;
+    configWindowFlags = 0;
 }
 
 void AppCore::showWindows()
