@@ -1,5 +1,4 @@
 #include "AppCore.h"
-#include "imgui.h"
 
 
 namespace ChordFinder
@@ -9,7 +8,9 @@ AppCore::AppCore()
 {
     audioWrapper = std::make_unique<AudioWrapper>();
     audioQueue = audioWrapper->getAudioQueue();
+    pcmAnalyzer = audioWrapper->getPCMAnalyzer();
     audioThread = nullptr;
+    initialize();
 }
 
 void AppCore::start()
@@ -17,36 +18,57 @@ void AppCore::start()
     audioThread = std::make_unique<std::thread>(threadproc, audioWrapper.get());
 }
 
+void AppCore::initialize()
+{
+    devices.push_back("default");
+    mainWindowFlags = ImGuiWindowFlags_NoMove;
+    configWindowFlags = ImGuiWindowFlags_NoMove;
+}
+
+void AppCore::showWindows()
+{
+    showMainWindow();
+    showConfigWindow();
+}
+
 void AppCore::showMainWindow()
 {
+    ImGui::Begin("Audio View", NULL, mainWindowFlags);
     static float values[0x1000] = {};
     static int values_offset = 0;
-    //static double refresh_time = 0.0;
-    //while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
-    //{
-    //    static float phase = 0.0f;
-    //    values[values_offset] = cosf(phase);
-    //    values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-    //    phase += 0.10f * values_offset;
-    //    refresh_time += 1.0f / 60.0f;
-    //}
     std::unique_ptr<double[]> ptr;
+    int timeout = 50;
     do
     {
         ptr = audioQueue->dequeue();
-    } while (ptr == nullptr);
+    } while ((ptr == nullptr) && (--timeout > 0));
     
-
-    // Plots can display overlay texts
-    // (in this example, we will display an average value)
+    if(ptr != nullptr)
     {
         for(int i = 0; i < 0x1000; i++)
         {
             values[i] = static_cast<float>(ptr[i]*50);
         }
-        ImGui::PlotLines("PCM Out", values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 160.0f));
+        audioQueue->release(ptr);
     }
-    audioQueue->release(ptr);
+    ImGui::PlotLines("PCM Out", values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 160.0f));
+    ImGui::End();
+}
+
+void AppCore::showConfigWindow()
+{
+    ImGui::Begin("Configuration", NULL, configWindowFlags);
+
+    // Using the _simplified_ one-liner Combo() api here
+    // See "Combo" section for examples of how to use the more flexible BeginCombo()/EndCombo() api.
+    static int item_current = 0;
+    ImGui::Combo("Audio Device", &item_current, devices.data(), devices.size());
+
+    const char* items2[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIIIIII", "JJJJ", "KKKKKKK" };
+    static int item_current2 = 0;
+    ImGui::Combo("combo2", &item_current2, items2, IM_ARRAYSIZE(items2));
+
+    ImGui::End();
 }
 
 void AppCore::threadproc(AudioWrapper *awrap)

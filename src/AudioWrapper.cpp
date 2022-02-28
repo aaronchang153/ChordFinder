@@ -21,10 +21,16 @@ AudioWrapper::AudioWrapper()
     device = std::make_unique<ma_device>();
     encoder = std::make_unique<ma_encoder>();
     aqueue = std::make_shared<AudioQueue>(0x1000);
+    analyzer = std::make_unique<PCMAnalyzer>();
 }
 
 AudioWrapper::~AudioWrapper()
 {
+}
+
+void AudioWrapper::start()
+{
+
 }
 
 void AudioWrapper::test()
@@ -33,7 +39,7 @@ void AudioWrapper::test()
     ma_encoder_config encoderConfig;
     ma_device_config deviceConfig;
 
-    encoderConfig = ma_encoder_config_init(ma_encoding_format_wav, ma_format_f32, 1, 44100);
+    encoderConfig = ma_encoder_config_init(ma_encoding_format_wav, ma_format_f32, channels, sample_rate);
 
     if (ma_encoder_init_file("output.wav", &encoderConfig, encoder.get()) != MA_SUCCESS) {
         printf("Failed to initialize output file.\n");
@@ -71,6 +77,11 @@ void AudioWrapper::test()
 std::shared_ptr<AudioQueue> AudioWrapper::getAudioQueue()
 {
     return aqueue;
+}
+
+std::shared_ptr<PCMAnalyzer> AudioWrapper::getPCMAnalyzer()
+{
+    return analyzer;
 }
 
 }
