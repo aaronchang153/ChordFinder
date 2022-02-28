@@ -4,11 +4,10 @@
 namespace ChordFinder
 {
 
-AudioQueue::AudioQueue(int numFrames, int frameSize)
+AudioQueue::AudioQueue(int frameSize)
 {
-    this->numFrames = numFrames;
     this->frameSize = frameSize;
-    for(int i = 0; i < numFrames; i++)    
+    for(int i = 0; i < DEFAULT_NUM_FRAMES; i++)    
     {
         framePool.push(std::make_unique<double[]>(frameSize));
     }
@@ -50,9 +49,15 @@ void AudioQueue::release(std::unique_ptr<double[]> &ptr)
 
 void AudioQueue::getNewFrame()
 {
-    //TODO: handle case where framePool is empty?
-    currentFrame = std::move(framePool.front());
-    framePool.pop();
+    if(!framePool.empty())
+    {
+        currentFrame = std::move(framePool.front());
+        framePool.pop();
+    }
+    else
+    {
+        currentFrame = std::make_unique<double[]>(frameSize);
+    }
     framePtr = 0;
 }
 

@@ -12,15 +12,18 @@ namespace ChordFinder
 class AudioQueue
 {
 public:
-    AudioQueue(int, int);
+    AudioQueue(int);
 
     void enqueue(const float*, int);
     std::unique_ptr<double[]> dequeue();
 
     void release(std::unique_ptr<double[]>&);
 
+    int getFrameSize() { return frameSize; }
+
 private:
-    int numFrames;
+    const int DEFAULT_NUM_FRAMES = 10; //init with this many, but it can expand
+
     int frameSize;
     int framePtr;
 
