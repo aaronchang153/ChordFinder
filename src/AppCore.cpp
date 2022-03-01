@@ -40,7 +40,7 @@ void AppCore::showMainWindow()
     ImGui::Begin("Audio View", NULL, mainWindowFlags);
     static float values[0x1000] = {};
     static int values_offset = 0;
-    std::unique_ptr<double[]> ptr;
+    std::unique_ptr<std::vector<double>> ptr;
     int timeout = 50;
     do
     {
@@ -51,7 +51,7 @@ void AppCore::showMainWindow()
     {
         for(int i = 0; i < 0x1000; i++)
         {
-            values[i] = static_cast<float>(ptr[i]*50);
+            values[i] = static_cast<float>(ptr->at(i)*50);
         }
         audioQueue->release(ptr);
     }
