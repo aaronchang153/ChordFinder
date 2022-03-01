@@ -12,6 +12,13 @@ AppCore::AppCore()
     initialize();
 }
 
+void AppCore::initialize()
+{
+    devices.push_back("default");
+    mainWindowFlags = 0;
+    configWindowFlags = 0;
+}
+
 void AppCore::start()
 {
     audioWrapper->start(); //TODO: does miniaudio audio capture happen in another thread by default?
@@ -20,13 +27,6 @@ void AppCore::start()
 void AppCore::shutdown()
 {
     audioWrapper->shutdown();
-}
-
-void AppCore::initialize()
-{
-    devices.push_back("default");
-    mainWindowFlags = 0;
-    configWindowFlags = 0;
 }
 
 void AppCore::showWindows()
