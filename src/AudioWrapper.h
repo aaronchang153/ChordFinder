@@ -20,7 +20,8 @@ public:
     ~AudioWrapper();
 
     void start();
-    void test();
+    void shutdown();
+    //void test();
 
     std::shared_ptr<AudioQueue> getAudioQueue();
     std::shared_ptr<PCMAnalyzer> getPCMAnalyzer();
@@ -31,7 +32,6 @@ public:
 
 private:
     std::unique_ptr<ma_device> device;
-    std::unique_ptr<ma_encoder> encoder;
 
     std::shared_ptr<AudioQueue> aqueue;
     std::shared_ptr<PCMAnalyzer> analyzer;
@@ -39,8 +39,18 @@ private:
     /* Loopback mode is currently only supported on WASAPI. */
     ma_backend backends[1] = { ma_backend_wasapi };
 
+    const ma_format format = ma_format_f32;
     const ma_uint32 channels = 1;
     const ma_uint32 sample_rate = 44100;
+
+    //Internal State Variables
+    bool deviceActive;
+
+    bool initializeDevice(ma_device_id * = NULL);
+    bool startDevice();
+    void stopDevice();
+
+    static void data_callback(ma_device*, void*, const void*, ma_uint32);
 
 };
 

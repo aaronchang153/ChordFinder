@@ -20,13 +20,12 @@ public:
 
     void start();
     void showWindows();
+    void shutdown();
 
 private:
     std::unique_ptr<AudioWrapper> audioWrapper;
     std::shared_ptr<AudioQueue> audioQueue; //should this be weak_ptr?
     std::shared_ptr<PCMAnalyzer> pcmAnalyzer;
-
-    std::unique_ptr<std::thread> audioThread;
 
     std::vector<char*> devices;
 
@@ -36,8 +35,6 @@ private:
 
     void showMainWindow();
     void showConfigWindow();
-
-    static void threadproc(AudioWrapper*);
 };
 
 }

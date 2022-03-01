@@ -9,13 +9,17 @@ AppCore::AppCore()
     audioWrapper = std::make_unique<AudioWrapper>();
     audioQueue = audioWrapper->getAudioQueue();
     pcmAnalyzer = audioWrapper->getPCMAnalyzer();
-    audioThread = nullptr;
     initialize();
 }
 
 void AppCore::start()
 {
-    audioThread = std::make_unique<std::thread>(threadproc, audioWrapper.get());
+    audioWrapper->start(); //TODO: does miniaudio audio capture happen in another thread by default?
+}
+
+void AppCore::shutdown()
+{
+    audioWrapper->shutdown();
 }
 
 void AppCore::initialize()
@@ -69,11 +73,6 @@ void AppCore::showConfigWindow()
     ImGui::Combo("combo2", &item_current2, items2, IM_ARRAYSIZE(items2));
 
     ImGui::End();
-}
-
-void AppCore::threadproc(AudioWrapper *awrap)
-{
-    awrap->test();
 }
 
 }
