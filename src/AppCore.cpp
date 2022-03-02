@@ -10,6 +10,11 @@ AppCore::AppCore()
     initialize();
 }
 
+AppCore::~AppCore()
+{
+    shutdown();
+}
+
 void AppCore::initialize()
 {
     devices.push_back("default");

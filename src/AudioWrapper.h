@@ -20,7 +20,7 @@ class AudioWrapper
 {
 public:
     AudioWrapper();
-    ~AudioWrapper();
+    virtual ~AudioWrapper();
 
     void start();
     void startPCMAnalysis(std::vector<float>&, std::mutex&);

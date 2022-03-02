@@ -13,7 +13,7 @@ class PCMAnalyzer
 {
 public:
     PCMAnalyzer(int);
-    ~PCMAnalyzer();
+    virtual ~PCMAnalyzer();
 
     void execute(std::vector<double>&);
     void getData(std::vector<float>&);

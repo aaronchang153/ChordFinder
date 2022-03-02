@@ -19,6 +19,7 @@ class AppCore
 {
 public:
     AppCore();
+    virtual ~AppCore();
 
     void start();
     void showWindows();

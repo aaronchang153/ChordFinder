@@ -17,6 +17,7 @@ AudioWrapper::AudioWrapper()
 
 AudioWrapper::~AudioWrapper()
 {
+    shutdown();
 }
 
 void AudioWrapper::start()
