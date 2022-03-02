@@ -8,6 +8,8 @@
 #include <cstdio>
 #include <memory>
 #include <thread>
+#include <chrono>
+#include <mutex>
 
 
 namespace ChordFinder
@@ -24,10 +26,11 @@ public:
 
 private:
     std::unique_ptr<AudioWrapper> audioWrapper;
-    std::shared_ptr<AudioQueue> audioQueue; //should this be weak_ptr?
-    std::shared_ptr<PCMAnalyzer> pcmAnalyzer;
 
     std::vector<char*> devices;
+
+    std::vector<float> freqData;
+    std::mutex freqDataMutex;
 
     ImGuiWindowFlags mainWindowFlags, configWindowFlags;
 

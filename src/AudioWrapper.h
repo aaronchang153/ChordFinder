@@ -5,6 +5,9 @@
 
 #include <cstdio>
 #include <memory>
+#include <thread>
+#include <chrono>
+#include <mutex>
 
 #include "AudioQueue.h"
 #include "PCMAnalyzer.h"
@@ -20,11 +23,8 @@ public:
     ~AudioWrapper();
 
     void start();
+    void startPCMAnalysis(std::vector<float>&, std::mutex&);
     void shutdown();
-    //void test();
-
-    std::shared_ptr<AudioQueue> getAudioQueue();
-    std::shared_ptr<PCMAnalyzer> getPCMAnalyzer();
 
     //For filtering since I only care about the range A0-C8
     //static const float FREQ_LO = 27.5f;
@@ -43,14 +43,24 @@ private:
     const ma_uint32 channels = 1;
     const ma_uint32 sample_rate = 44100;
 
+    const int FRAME_SIZE = 0x1000;
+
+    std::thread analysisThread;
+
     //Internal State Variables
     bool deviceActive;
+    bool shuttingDown;
 
     bool initializeDevice(ma_device_id * = NULL);
     bool startDevice();
     void stopDevice();
 
     static void data_callback(ma_device*, void*, const void*, ma_uint32);
+    static void pcm_analysis_proc(std::shared_ptr<PCMAnalyzer> analyzer,
+                                  std::shared_ptr<AudioQueue> queue,
+                                  std::vector<float> &dataOut,
+                                  std::mutex &mutex,
+                                  bool &shutdown);
 
 };
 

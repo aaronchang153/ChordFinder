@@ -7,8 +7,6 @@ namespace ChordFinder
 AppCore::AppCore()
 {
     audioWrapper = std::make_unique<AudioWrapper>();
-    audioQueue = audioWrapper->getAudioQueue();
-    pcmAnalyzer = audioWrapper->getPCMAnalyzer();
     initialize();
 }
 
@@ -21,7 +19,8 @@ void AppCore::initialize()
 
 void AppCore::start()
 {
-    audioWrapper->start(); //TODO: does miniaudio audio capture happen in another thread by default?
+    audioWrapper->start();
+    audioWrapper->startPCMAnalysis(std::ref(freqData), std::ref(freqDataMutex));
 }
 
 void AppCore::shutdown()
@@ -38,24 +37,10 @@ void AppCore::showWindows()
 void AppCore::showMainWindow()
 {
     ImGui::Begin("Audio View", NULL, mainWindowFlags);
-    static float values[0x1000] = {};
-    static int values_offset = 0;
-    std::unique_ptr<std::vector<double>> ptr;
-    int timeout = 50;
-    do
-    {
-        ptr = audioQueue->dequeue();
-    } while ((ptr == nullptr) && (--timeout > 0));
-    
-    if(ptr != nullptr)
-    {
-        for(int i = 0; i < 0x1000; i++)
-        {
-            values[i] = static_cast<float>(ptr->at(i)*50);
-        }
-        audioQueue->release(ptr);
+    { //Critical section
+        std::unique_lock<std::mutex> lock(freqDataMutex);
+        ImGui::PlotLines("PCM Out", freqData.data(), freqData.size(), 0, NULL, -1.0f, 1.0f, ImVec2(0, 160.0f));
     }
-    ImGui::PlotLines("PCM Out", values, IM_ARRAYSIZE(values), values_offset, NULL, -1.0f, 1.0f, ImVec2(0, 160.0f));
     ImGui::End();
 }
 

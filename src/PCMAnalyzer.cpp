@@ -6,17 +6,16 @@
 namespace ChordFinder
 {
 
-PCMAnalyzer::PCMAnalyzer()
+PCMAnalyzer::PCMAnalyzer(int frameSize)
 {
-    frameSize = 0;
-    frame = nullptr;
     fft_out = nullptr;
-    freq_data = nullptr;
+    initialized = false;
+    changeFrameSize(frameSize);
 }
 
 PCMAnalyzer::~PCMAnalyzer()
 {
-    if(fft_out != nullptr)
+    if(initialized)
     {
         fftw_destroy_plan(plan);
     }
@@ -26,35 +25,36 @@ void PCMAnalyzer::changeFrameSize(int newSize)
 {
     frameSize = newSize;
     numBins = (frameSize / 2) + 1;
-    frame = std::make_unique<double[]>(frameSize);
+    frame.resize(frameSize);
     fft_out = std::make_unique<fftw_complex[]>(frameSize);
-    freq_data = std::make_unique<float[]>(numBins);
+    freq_data.resize(numBins);
     updateFFTWPlan();
 }
 
-void PCMAnalyzer::execute(double *data)
+void PCMAnalyzer::execute(std::vector<double> &data)
 {
-    memcpy(frame.get(), data, sizeof(double) * frameSize);
-    fftw_execute(plan);
+    frame = data;
+    //fftw_execute(plan);
     for(int i = 0; i < numBins; i++)
     {
-        freq_data[i] = static_cast<float>(std::hypot(fft_out[i][0], fft_out[i][1]));
+        freq_data[i] = static_cast<float>(frame[i]*50);//std::hypot(fft_out[i][0], fft_out[i][1]));
     }
 }
 
-void PCMAnalyzer::getData(float *dst)
+void PCMAnalyzer::getData(std::vector<float> &dst)
 {
-    memcpy(dst, freq_data.get(), sizeof(float) * frameSize);
+    dst = freq_data;
 }
 
 void PCMAnalyzer::updateFFTWPlan()
 {
-    if(fft_out != nullptr)
+    if(initialized)
     {
         fftw_destroy_plan(plan);
     }
     //TODO: need to set fftw flags?
-    plan = fftw_plan_dft_r2c_1d(frameSize, frame.get(), fft_out.get(), 0);
+    plan = fftw_plan_dft_r2c_1d(frameSize, frame.data(), fft_out.get(), 0);
+    initialized = true;
 }
     
 }

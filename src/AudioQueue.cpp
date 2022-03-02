@@ -18,7 +18,7 @@ void AudioQueue::enqueue(const float *data, int len)
 {
     for(int i = 0; i < len; i++)
     {
-        if(currentFrame->size() < frameSize)
+        if(static_cast<int>(currentFrame->size()) < frameSize)
         {
             currentFrame->push_back(static_cast<double>(data[i]));
         }

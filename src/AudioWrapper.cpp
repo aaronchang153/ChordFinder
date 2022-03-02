@@ -1,5 +1,6 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "AudioWrapper.h"
+#include <cmath>
 
 namespace ChordFinder
 {
@@ -7,10 +8,11 @@ namespace ChordFinder
 AudioWrapper::AudioWrapper()
 {
     device = std::make_unique<ma_device>();
-    aqueue = std::make_shared<AudioQueue>(0x1000);
-    analyzer = std::make_unique<PCMAnalyzer>();
+    aqueue = std::make_shared<AudioQueue>(FRAME_SIZE);
+    analyzer = std::make_shared<PCMAnalyzer>(FRAME_SIZE);
 
     deviceActive = false;
+    shuttingDown = false;
 }
 
 AudioWrapper::~AudioWrapper()
@@ -23,9 +25,20 @@ void AudioWrapper::start()
     startDevice();
 }
 
+void AudioWrapper::startPCMAnalysis(std::vector<float> &dstVector, std::mutex &mutex)
+{
+    analysisThread = std::thread(AudioWrapper::pcm_analysis_proc, analyzer, aqueue,
+                                 std::ref(dstVector), std::ref(mutex), std::ref(shuttingDown));
+}
+
 void AudioWrapper::shutdown()
 {
+    shuttingDown = true;
     stopDevice();
+    if(analysisThread.joinable())
+    {
+        analysisThread.join();
+    }
 }
 
 bool AudioWrapper::initializeDevice(ma_device_id *device_id)
@@ -80,14 +93,37 @@ void AudioWrapper::data_callback(ma_device* pDevice, void* pOutput, const void* 
     (void)pOutput;
 }
 
-std::shared_ptr<AudioQueue> AudioWrapper::getAudioQueue()
+void AudioWrapper::pcm_analysis_proc(std::shared_ptr<PCMAnalyzer> analyzer,
+                                     std::shared_ptr<AudioQueue> queue,
+                                     std::vector<float> &dataOut,
+                                     std::mutex &mutex,
+                                     bool &shutdown)
 {
-    return aqueue;
-}
+    int timeout;
+    std::unique_ptr<std::vector<double>> frame;
+    while(!shutdown)
+    {
+        do
+        {
+            frame = queue->dequeue();
+        } while((frame == nullptr) && (--timeout > 0));
 
-std::shared_ptr<PCMAnalyzer> AudioWrapper::getPCMAnalyzer()
-{
-    return analyzer;
+        if(frame != nullptr)
+        {
+            analyzer->execute(*frame);
+
+            { //Critical section
+                std::unique_lock<std::mutex> lock(mutex);
+                if(dataOut.size() != frame->size())
+                {
+                    dataOut.resize(frame->size());
+                }
+                analyzer->getData(std::ref(dataOut));
+            }
+
+            queue->release(frame);
+        }
+    }
 }
 
 }
