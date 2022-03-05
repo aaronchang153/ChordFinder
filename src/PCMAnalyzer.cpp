@@ -10,7 +10,7 @@ PCMAnalyzer::PCMAnalyzer(int frameSize)
 {
     fft_out = nullptr;
     initialized = false;
-    changeFrameSize(frameSize);
+    setFrameSize(frameSize);
 }
 
 PCMAnalyzer::~PCMAnalyzer()
@@ -21,7 +21,7 @@ PCMAnalyzer::~PCMAnalyzer()
     }
 }
 
-void PCMAnalyzer::changeFrameSize(int newSize)
+void PCMAnalyzer::setFrameSize(int newSize)
 {
     frameSize = newSize;
     numBins = (frameSize / 2) + 1;

@@ -31,7 +31,7 @@ private:
     std::vector<float> freq_data;
     std::array<float, 88> output_data;
 
-    void changeFrameSize(int);
+    void setFrameSize(int);
     void updateFFTWPlan();
 };
 
