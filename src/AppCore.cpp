@@ -47,20 +47,27 @@ void AppCore::showMainWindow()
     auto winSize = ImGui::GetWindowSize();
     { //Critical section
         std::unique_lock<std::mutex> lock(freqDataMutex);
-        int maxIdx = audioWrapper->getMaxOutputIndex();
+        int maxIdx;
+        float maxValue;
         try
         {
-            float maxValue = freqData.at(maxIdx) * 1.05; //add a small buffer for aesthetics
-            if(maxValue < 0.5f) { maxValue = 0.5f; }
-            ImGui::PlotHistogram("", freqData.data(), freqData.size(), 0, NULL, -maxValue*0.1f, maxValue, ImVec2(winSize.x-15, winSize.y/2));
-
-            ImGui::Text("Max Value: %.2f", maxValue);
-            ImGui::SameLine(0.0f, 0.0f);
-            HelpMarker("A low maximum value may indicate that the results are just noise");
-
-            ImGui::Text("Loudest Note: %s", NoteLibrary::noteIdxToStr(maxIdx).c_str());
+            maxIdx = audioWrapper->getMaxOutputIndex();
+            maxValue = freqData.at(maxIdx) * 1.05; //add a small buffer for aesthetics
         }
-        catch(const std::out_of_range&) { /* Not really an error. There just isn't any audio data yet. */ }
+        catch(const std::out_of_range&)
+        {
+            //Not really an error. There just isn't any audio data yet.
+            maxValue = 0.0f;
+        }
+
+        if(maxValue < 0.5f) { maxValue = 0.5f; }
+        ImGui::PlotHistogram("", freqData.data(), freqData.size(), 0, NULL, -maxValue*0.1f, maxValue, ImVec2(winSize.x-15, winSize.y/2));
+
+        ImGui::Text("Max Value: %.2f", maxValue);
+        ImGui::SameLine(0.0f, 0.0f);
+        HelpMarker("A low maximum value may indicate that the results are just noise");
+
+        ImGui::Text("Loudest Note: %s", NoteLibrary::noteIdxToStr(maxIdx).c_str());
     }
     ImGui::End();
 }
