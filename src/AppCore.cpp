@@ -4,6 +4,8 @@
 namespace ChordFinder
 {
 
+static void HelpMarker(const char* desc);
+
 AppCore::AppCore()
 {
     audioWrapper = std::make_unique<AudioWrapper>();
@@ -42,9 +44,23 @@ void AppCore::showWindows()
 void AppCore::showMainWindow()
 {
     ImGui::Begin("Audio View", NULL, mainWindowFlags);
+    auto winSize = ImGui::GetWindowSize();
     { //Critical section
         std::unique_lock<std::mutex> lock(freqDataMutex);
-        ImGui::PlotLines("PCM Out", freqData.data(), freqData.size(), 0, NULL, -1.0f, 1.0f, ImVec2(0, 160.0f));
+        int maxIdx = audioWrapper->getMaxOutputIndex();
+        try
+        {
+            float maxValue = freqData.at(maxIdx) * 1.05; //add a small buffer for aesthetics
+            if(maxValue < 0.5f) { maxValue = 0.5f; }
+            ImGui::PlotHistogram("", freqData.data(), freqData.size(), 0, NULL, -maxValue*0.1f, maxValue, ImVec2(winSize.x-15, winSize.y/2));
+
+            ImGui::Text("Max Value: %.2f", maxValue);
+            ImGui::SameLine(0.0f, 0.0f);
+            HelpMarker("A low maximum value may indicate that the results are just noise");
+
+            ImGui::Text("Loudest Note: %s", NoteLibrary::noteIdxToStr(maxIdx).c_str());
+        }
+        catch(const std::out_of_range&) { /* Not really an error. There just isn't any audio data yet. */ }
     }
     ImGui::End();
 }
@@ -63,6 +79,21 @@ void AppCore::showConfigWindow()
     ImGui::Combo("combo2", &item_current2, items2, IM_ARRAYSIZE(items2));
 
     ImGui::End();
+}
+
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+static void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 }

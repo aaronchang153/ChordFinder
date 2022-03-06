@@ -5,6 +5,12 @@
 namespace ChordFinder
 {
 
+const ma_format AudioWrapper::format = ma_format_f32;
+const ma_uint32 AudioWrapper::channels = 1;
+const ma_uint32 AudioWrapper::sample_rate = 44100;
+
+const int AudioWrapper::FRAME_SIZE = 0x1000;
+
 AudioWrapper::AudioWrapper()
 {
     device = std::make_unique<ma_device>();
@@ -40,6 +46,11 @@ void AudioWrapper::shutdown()
     {
         analysisThread.join();
     }
+}
+
+int AudioWrapper::getMaxOutputIndex()
+{
+    return analyzer->getMax();
 }
 
 bool AudioWrapper::initializeDevice(ma_device_id *device_id)

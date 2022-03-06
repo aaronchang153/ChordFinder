@@ -17,7 +17,8 @@
 EXE = ChordFinder
 IMGUI_DIR = lib/imgui
 SOURCE_DIR = src
-SOURCES = $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/AppCore.cpp $(SOURCE_DIR)/AudioWrapper.cpp $(SOURCE_DIR)/AudioQueue.cpp $(SOURCE_DIR)/PCMAnalyzer.cpp
+SOURCES = $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/AppCore.cpp $(SOURCE_DIR)/AudioWrapper.cpp $(SOURCE_DIR)/AudioQueue.cpp $(SOURCE_DIR)/PCMAnalyzer.cpp 
+SOURCES += $(SOURCE_DIR)/NoteLibrary.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))

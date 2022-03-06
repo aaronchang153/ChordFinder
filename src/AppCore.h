@@ -10,6 +10,7 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <algorithm>
 
 
 namespace ChordFinder

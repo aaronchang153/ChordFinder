@@ -26,9 +26,13 @@ public:
     void startPCMAnalysis(std::vector<float>&, std::mutex&);
     void shutdown();
 
-    //For filtering since I only care about the range A0-C8
-    //static const float FREQ_LO = 27.5f;
-    //static const float FREQ_HI = 4186.0f;
+    int getMaxOutputIndex();
+
+    static const ma_format format;
+    static const ma_uint32 channels;
+    static const ma_uint32 sample_rate;
+
+    static const int FRAME_SIZE;
 
 private:
     std::unique_ptr<ma_device> device;
@@ -38,12 +42,6 @@ private:
 
     /* Loopback mode is currently only supported on WASAPI. */
     ma_backend backends[1] = { ma_backend_wasapi };
-
-    const ma_format format = ma_format_f32;
-    const ma_uint32 channels = 1;
-    const ma_uint32 sample_rate = 44100;
-
-    const int FRAME_SIZE = 0x1000;
 
     std::thread analysisThread;
 
