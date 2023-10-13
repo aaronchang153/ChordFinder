@@ -19,7 +19,8 @@ AppCore::~AppCore()
 
 void AppCore::initialize()
 {
-    devices.push_back("default");
+    char temp[] = "defualt";
+    devices.push_back(temp);
     mainWindowFlags = 0;
     configWindowFlags = 0;
 }

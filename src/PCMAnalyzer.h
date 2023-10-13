@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fftw/fftw3.h"
+#include <fftw3.h>
 #include <vector>
 #include <memory>
 #include <thread>
